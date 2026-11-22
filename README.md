@@ -54,7 +54,7 @@ The platform unifies 3 siloed operational systems:
 
 | File | Type | Description | Rubric |
 | :--- | :--- | :--- | :---: |
-| **`DWH_Template_Part_1_filled_v3.xlsx`** | Excel Workbook | Official multi-sheet planning document (8 tabs: `ReadMe`, `Business.Req.XRay`, `OLTP.XRay`, `Transform.OLTP`, `Dim.Tables`, `Fact.Table`, `Star.Schema`, `Bus.Matrix`). | 2.5% |
+| **`Milestone.1.SDI.DWH.Excel.xlsx`** | Excel Workbook | Official multi-sheet planning document (8 tabs: `ReadMe`, `Business.Req.XRay`, `OLTP.XRay`, `Transform.OLTP`, `Dim.Tables`, `Fact.Table`, `Star.Schema`, `Bus.Matrix`). | 2.5% |
 | **`phase1_sdi_duckdb.sql`** | SQL Script | Complete DDL, SCD Type 1 & 2 upsert logic, sequences, validation rules, fact loading, and analytical views. | 2.5% |
 | **`run_etl.py`** | Python Script | Automated pipeline runner that builds the DuckDB data mart (`dwh.duckdb`). Supports `--rebuild`. | Pipeline |
 | **`check_etl.py`** | Python Script | Verification test suite: validates financial reconciliation, foreign key integrity, executes 3 dimensional queries, and logs latency metrics. | 2.0% |
