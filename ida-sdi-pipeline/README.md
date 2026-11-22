@@ -123,6 +123,13 @@ docker exec -i ida-sdi-pipeline-pharma-db-1 psql -U pharma -d pharma_dwh < sql/i
 ```
 (In PowerShell use: `Get-Content sql/indexes.sql | docker exec -i ida-sdi-pipeline-pharma-db-1 psql -U pharma -d pharma_dwh`)
 
+## Oversampled data + data dictionary
+`data/oversampled/` holds the generated files for each refresh (`refresh_1_2026_Q1` … `refresh_4_2026_Q4`,
+3 CSVs each) and the data dictionary `data_dictionary.csv` (opens in Excel): every column's type,
+meaning, example, how it was generated and its validation rule.
+About 0.2% of generated rows are broken on purpose (empty MedicineID, invalid date, negative price or
+quantity) to test validation; they are rejected at load time and logged in `ops.rejected_rows`.
+
 ## Report
 `docs/Data_Generation_Report.pdf` – data generation logic, statistics, ingestion method, assumptions.
 
