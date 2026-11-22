@@ -1,0 +1,15 @@
+# Connects Grafana to our project database (pharma-db) automatically.
+apiVersion: 1
+datasources:
+  - name: pharma_dwh
+    uid: pharma-pg
+    type: grafana-postgresql-datasource
+    url: pharma-db:5432
+    user: pharma
+    secureJsonData:
+      password: pharma
+    jsonData:
+      database: pharma_dwh
+      sslmode: disable
+      postgresVersion: 1600
+    isDefault: true

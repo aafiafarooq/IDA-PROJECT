@@ -50,6 +50,19 @@ Open **http://localhost:8000/docs** for a web page where you can try every endpo
 Flow: API receives file -> `data/incoming` -> Airflow file watcher -> validation -> Postgres staging.
 The automatic generator writes into the same folder, so both routes go through the same checks.
 
+## Data engineering dashboards (Grafana)
+Open **http://localhost:3000** (viewing needs no login; `admin` / `admin` to edit).
+Both dashboards are set up automatically from `grafana/` and refresh every 10 seconds,
+so they update on screen as soon as Airflow loads a new file.
+
+| Dashboard | Shows | Source tables |
+|---|---|---|
+| **SDI - Batch Ingestion** | Batch success rate %, load duration per source and per file, rows processed per batch (loaded / rejected / duplicate), rejected rows by reason, rows generated per refresh, load log | `ops.batch_load_log`, `ops.rejected_rows`, `ops.generation_log` |
+| **SDI - Storage & Staging** | Total staged rows, database size (MB), share of rows and MB per source (donuts), date coverage per table, cumulative row growth after each refresh | `ops.storage_metrics`, `ops.batch_load_log` |
+
+To change a dashboard: edit it in the browser, then **Share → Export → Save to file** and
+replace the JSON in `grafana/dashboards/`.
+
 ## Looking at the data
 Connect any SQL tool (pgAdmin, DBeaver, VS Code, Power BI) to:
 host `localhost`, port `5433`, database `pharma_dwh`, user `pharma`, password `pharma`.

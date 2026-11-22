@@ -1,0 +1,9 @@
+# Loads every dashboard JSON in grafana/dashboards on startup.
+apiVersion: 1
+providers:
+  - name: sdi
+    folder: SDI Data Engineering
+    type: file
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

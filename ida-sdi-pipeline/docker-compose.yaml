@@ -7,6 +7,7 @@
 # Start:  docker compose up -d        (first time takes ~5-10 min)
 # Open:   http://localhost:8080        user: airflow  password: airflow
 #         http://localhost:8000/docs   ingestion API
+#         http://localhost:3000        Grafana dashboards (admin / admin)
 # Stop:   docker compose down          (data is kept)
 
 x-airflow-common: &airflow-common
@@ -85,6 +86,28 @@ services:
         condition: service_healthy
     restart: always
 
+  # Data engineering dashboards (batch ingestion + storage), read from ops.* tables.
+  # Open http://localhost:3000  (view without login; admin / admin to edit)
+  grafana:
+    image: grafana/grafana-oss:11.3.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/batch_ingestion.json
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 5s
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      pharma-db:
+        condition: service_healthy
+    restart: always
+
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash
@@ -130,3 +153,4 @@ services:
 volumes:
   airflow-db-data:
   pharma-db-data:
+  grafana-data:
