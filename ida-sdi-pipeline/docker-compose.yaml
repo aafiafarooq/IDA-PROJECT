@@ -87,7 +87,7 @@ services:
     restart: always
 
   # Data engineering dashboards (batch ingestion + storage), read from ops.* tables.
-  # Open http://localhost:3000  (view without login; admin / admin to edit)
+  # Open http://localhost:3000  (view without login, admin / admin to edit)
   grafana:
     image: grafana/grafana-oss:11.3.0
     environment:

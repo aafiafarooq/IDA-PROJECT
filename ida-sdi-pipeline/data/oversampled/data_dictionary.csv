@@ -1,5 +1,5 @@
 ﻿File,Staging table,Column,Type,Description,Example,How generated,Validation rule
-01_master_data,staging.stg_master,MedicineID,VARCHAR,Medicine (SKU) business key; joins to sales and hospital demand,MED003,Copied (same medicine),Must not be empty
+01_master_data,staging.stg_master,MedicineID,VARCHAR,"Medicine (SKU) business key, joins to sales and hospital demand",MED003,Copied (same medicine),Must not be empty
 01_master_data,staging.stg_master,InternalSKU,VARCHAR,Internal stock-keeping code,SKU-01-0003,Copied from base row,
 01_master_data,staging.stg_master,GTIN14,VARCHAR(20),14-digit Global Trade Item Number (barcode),09506000000039,Copied from base row,
 01_master_data,staging.stg_master,GenericName,VARCHAR,Generic (active ingredient) name,Sitagliptin,Copied from base row,
@@ -33,7 +33,7 @@
 01_master_data,staging.stg_master,ProductStatus,VARCHAR,Active / discontinued,Active,Copied from base row,
 01_master_data,staging.stg_master,EffectiveFromDate,DATE,"Date this price version starts. With MedicineID forms the key, so each price change is a new row (SCD Type 2)",2026-01-01,Set to first day of the refresh period,Valid YYYY-MM-DD date
 01_master_data,staging.stg_master,SourceSystem,VARCHAR,System that produced the row,ERP_PRODUCT_MASTER_SIMULATED,Set to *_SIMULATED for generated rows,
-05_pharmacy_sales_data,staging.stg_sales,SalesTransactionID,VARCHAR,Unique sale ID (primary key),SALE-R2-00000001,New unique ID per refresh (SALE-R<n>-<seq>),Must not be empty; duplicates skipped
+05_pharmacy_sales_data,staging.stg_sales,SalesTransactionID,VARCHAR,Unique sale ID (primary key),SALE-R2-00000001,New unique ID per refresh (SALE-R<n>-<seq>),"Must not be empty, duplicates skipped"
 05_pharmacy_sales_data,staging.stg_sales,SalesDate,DATE,Date of the sale,2026-04-13,Shifted forward 1 year,Valid YYYY-MM-DD date
 05_pharmacy_sales_data,staging.stg_sales,SalesTimestampUTC,TIMESTAMPTZ,Exact time of the sale (UTC),2026-04-13T10:44:34Z,Shifted forward 1 year,
 05_pharmacy_sales_data,staging.stg_sales,SalesChannel,VARCHAR,Physical Pharmacy or Ecommerce,Physical Pharmacy,Copied from base row,
@@ -53,7 +53,7 @@
 05_pharmacy_sales_data,staging.stg_sales,WarehouseLotID,VARCHAR,Warehouse lot the stock came from (lineage),WHLOT-0000961,Copied from base row,
 05_pharmacy_sales_data,staging.stg_sales,SourceWarehouseID,VARCHAR,Regional warehouse (6 warehouses),WH003,Copied from base row,
 05_pharmacy_sales_data,staging.stg_sales,ProductionBatchID,VARCHAR,Manufacturing batch (lineage),B25-PLT02-000560,Copied from base row,
-05_pharmacy_sales_data,staging.stg_sales,MedicineID,VARCHAR,Medicine sold; joins to master data,MED063,Copied from base row,Must not be empty
+05_pharmacy_sales_data,staging.stg_sales,MedicineID,VARCHAR,"Medicine sold, joins to master data",MED063,Copied from base row,Must not be empty
 05_pharmacy_sales_data,staging.stg_sales,GTIN14,VARCHAR(20),Barcode of the medicine,09506000000633,Copied from base row,
 05_pharmacy_sales_data,staging.stg_sales,DiseaseCategory,VARCHAR,Disease area of the medicine,Respiratory Disease,Copied from base row,
 05_pharmacy_sales_data,staging.stg_sales,GenericName,VARCHAR,Generic name of the medicine,Salbutamol,Copied from base row,
@@ -78,7 +78,7 @@
 05_pharmacy_sales_data,staging.stg_sales,ReturnedQuantityPacks,INTEGER,Packs returned,0,"Copied, capped at new QuantitySoldPacks",
 05_pharmacy_sales_data,staging.stg_sales,SaleStatus,VARCHAR,Completed / Partially returned,Completed,Copied from base row,
 05_pharmacy_sales_data,staging.stg_sales,SourceSystem,VARCHAR,System that produced the row,PHARMACY_POS_SIMULATED,Set to *_SIMULATED for generated rows,
-06_hospital_demand_data,staging.stg_hospital_demand,HospitalDemandRecordID,VARCHAR,Unique record ID (primary key); 1 row = 1 hospital × medicine × month,HDEM-R2-000001,New unique ID per refresh (HDEM-R<n>-<seq>),Duplicates skipped
+06_hospital_demand_data,staging.stg_hospital_demand,HospitalDemandRecordID,VARCHAR,Unique record ID (primary key). 1 row = 1 hospital × medicine × month,HDEM-R2-000001,New unique ID per refresh (HDEM-R<n>-<seq>),Duplicates skipped
 06_hospital_demand_data,staging.stg_hospital_demand,DemandMonth,DATE,First day of the month the record covers,2026-04-01,Shifted forward 1 year,Valid YYYY-MM-DD date
 06_hospital_demand_data,staging.stg_hospital_demand,HospitalID,VARCHAR,Hospital (12 hospitals),HOSP001,Copied from base row,Must not be empty
 06_hospital_demand_data,staging.stg_hospital_demand,HospitalGLN,VARCHAR(20),Hospital Global Location Number,0950600400017,Copied from base row,
@@ -93,7 +93,7 @@
 06_hospital_demand_data,staging.stg_hospital_demand,AverageOccupancyRatePct,INTEGER,Average bed occupancy (%),68,Copied from base row,
 06_hospital_demand_data,staging.stg_hospital_demand,TraumaLevel,VARCHAR,Trauma centre level (~50% empty),Level I,Copied from base row,
 06_hospital_demand_data,staging.stg_hospital_demand,CatchmentPopulation,INTEGER,Population the hospital serves,1800000,Copied from base row,
-06_hospital_demand_data,staging.stg_hospital_demand,MedicineID,VARCHAR,Medicine; joins to master data,MED001,Copied from base row,Must not be empty
+06_hospital_demand_data,staging.stg_hospital_demand,MedicineID,VARCHAR,"Medicine, joins to master data",MED001,Copied from base row,Must not be empty
 06_hospital_demand_data,staging.stg_hospital_demand,GTIN14,VARCHAR(20),Barcode of the medicine,09506000000015,Copied from base row,
 06_hospital_demand_data,staging.stg_hospital_demand,GenericName,VARCHAR,Generic name,Metformin,Copied from base row,
 06_hospital_demand_data,staging.stg_hospital_demand,DiseaseCategory,VARCHAR,Disease area,Diabetes Mellitus,Copied from base row,

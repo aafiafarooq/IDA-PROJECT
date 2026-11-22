@@ -241,7 +241,7 @@
       "id": 5,
       "type": "stat",
       "title": "Reject rate",
-      "description": "Rows rejected by validation / rows read x 100. Green under 1%, orange 1-5%, red above 5%. Includes the ~0.2% of generated rows broken on purpose; raw counts per rule are in 'Rejected rows by reason'.",
+      "description": "Rows rejected by validation / rows read x 100. Green under 1%, orange 1-5%, red above 5%. Includes the ~0.2% of generated rows broken on purpose. Raw counts per rule are in 'Rejected rows by reason'.",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
