@@ -57,8 +57,8 @@ so they update on screen as soon as Airflow loads a new file.
 
 | Dashboard | Shows | Source tables |
 |---|---|---|
-| **SDI - Batch Ingestion** | Batch success rate %, load duration per source and per file, rows processed per batch (loaded / rejected / duplicate), rejected rows by reason, rows generated per refresh, load log | `ops.batch_load_log`, `ops.rejected_rows`, `ops.generation_log` |
-| **SDI - Storage & Staging** | Total staged rows, database size (MB), share of rows and MB per source (donuts), date coverage per table, cumulative row growth after each refresh | `ops.storage_metrics`, `ops.batch_load_log` |
+| **SDI - Batch Ingestion** | Batch success rate %, reject rate %, median sales load time, load duration per source and per file, rows processed per batch (loaded / rejected / duplicate), rejected rows by reason, rows generated per refresh, load log | `ops.batch_load_log`, `ops.rejected_rows`, `ops.generation_log` |
+| **SDI - Storage & Staging** | Total staged rows, database size (MB), share of rows per source (donut), storage MB per table (bar), date coverage per table, cumulative row growth after each refresh | `ops.storage_metrics`, `ops.batch_load_log` |
 
 To change a dashboard: edit it in the browser, then **Share → Export → Save to file** and
 replace the JSON in `grafana/dashboards/`.

@@ -46,7 +46,7 @@
       "id": 2,
       "type": "stat",
       "title": "Batch success rate",
-      "description": "Successful runs / total attempted runs x 100",
+      "description": "Successful file loads / attempted file loads x 100. Green = 100%, orange = 90-99.9%, red = below 90%.",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
@@ -89,7 +89,7 @@
               },
               {
                 "color": "green",
-                "value": 99
+                "value": 100
               }
             ]
           },
@@ -151,7 +151,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "text",
                 "value": null
               }
             ]
@@ -167,7 +167,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -213,7 +213,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "text",
                 "value": null
               }
             ]
@@ -229,7 +229,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -240,8 +240,8 @@
     {
       "id": 5,
       "type": "stat",
-      "title": "Rows rejected",
-      "description": "Rows that failed validation (see reasons below)",
+      "title": "Reject rate",
+      "description": "Rows rejected by validation / rows read x 100. Green under 1%, orange 1-5%, red above 5%. Includes the ~0.2% of generated rows broken on purpose; raw counts per rule are in 'Rejected rows by reason'.",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
@@ -262,12 +262,12 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT coalesce(sum(rows_rejected),0) AS \"Rejected\" FROM ops.batch_load_log"
+          "rawSql": "SELECT round(100.0 * coalesce(sum(rows_rejected), 0) / nullif(sum(rows_read), 0), 2) AS \"Reject rate\"\nFROM ops.batch_load_log"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "unit": "percent",
           "color": {
             "mode": "thresholds"
           },
@@ -275,11 +275,20 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "orange",
+                "color": "green",
                 "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
               }
             ]
-          }
+          },
+          "decimals": 2
         },
         "overrides": []
       },
@@ -302,8 +311,8 @@
     {
       "id": 6,
       "type": "stat",
-      "title": "Avg load duration",
-      "description": "",
+      "title": "Median sales load",
+      "description": "Typical time to load one sales file (median, so the one-off 106 s initial load does not distort it).",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
@@ -324,7 +333,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT avg(duration_sec) AS \"Avg\" FROM ops.batch_load_log"
+          "rawSql": "SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_sec) AS \"Median\"\nFROM ops.batch_load_log WHERE source_name = 'sales'"
         }
       ],
       "fieldConfig": {
@@ -337,12 +346,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "purple",
+                "color": "text",
                 "value": null
               }
             ]
           },
-          "decimals": 2
+          "decimals": 1
         },
         "overrides": []
       },
@@ -354,7 +363,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -416,7 +425,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -704,7 +713,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT replace(source_name, '_demand', '') || ': ' || reason AS \"Reason\", count(*) AS \"Rows\"\nFROM ops.rejected_rows\nGROUP BY 1\nORDER BY 2 DESC"
+          "rawSql": "SELECT CASE source_name WHEN 'hospital_demand' THEN 'hospital' ELSE source_name END || ': ' ||\n       CASE\n         WHEN reason LIKE 'Invalid %' THEN 'invalid date'\n         WHEN reason LIKE '% is empty' THEN replace(reason, ' is empty', ' empty')\n         WHEN reason LIKE '%QuantityPacks is negative' THEN lower(replace(reason, 'QuantityPacks is negative', '')) || ' qty < 0'\n         WHEN reason LIKE '%USD is not > 0' THEN 'price \u2264 0'\n         WHEN reason LIKE '%Packs is not > 0' THEN 'quantity \u2264 0'\n         ELSE reason\n       END AS \"Reason\",\n       count(*) AS \"Rows\"\nFROM ops.rejected_rows\nGROUP BY 1\nORDER BY 2 DESC"
         }
       ],
       "fieldConfig": {
@@ -729,7 +738,7 @@
                 "id": "color",
                 "value": {
                   "mode": "fixed",
-                  "fixedColor": "red"
+                  "fixedColor": "orange"
                 }
               }
             ]
@@ -773,7 +782,7 @@
       "id": 15,
       "type": "barchart",
       "title": "Rows generated per refresh",
-      "description": "Rows created by the sdi_generate_data DAG for each new 3-month period.",
+      "description": "Rows created by the sdi_generate_data DAG for each new 3-month period of 2026.",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
@@ -781,8 +790,8 @@
       "gridPos": {
         "x": 0,
         "y": 27,
-        "w": 9,
-        "h": 9
+        "w": 24,
+        "h": 8
       },
       "targets": [
         {
@@ -794,7 +803,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT 'Refresh ' || refresh_no || ' (' || to_char(min(period_start), 'Mon') || '-' || to_char(max(period_end), 'Mon YY') || ')' AS \"Refresh\",\n       sum(rows_generated) FILTER (WHERE source_name = 'sales') AS \"Sales\",\n       sum(rows_generated) FILTER (WHERE source_name = 'hospital_demand') AS \"Hospital demand\",\n       sum(rows_generated) FILTER (WHERE source_name = 'master') AS \"Master (price changes)\"\nFROM ops.generation_log\nGROUP BY refresh_no\nORDER BY refresh_no"
+          "rawSql": "SELECT 'R' || refresh_no || ' ' || to_char(min(period_start), 'Mon') || '-' || to_char(max(period_end), 'Mon') AS \"Refresh\",\n       sum(rows_generated) FILTER (WHERE source_name = 'sales') AS \"Sales\",\n       sum(rows_generated) FILTER (WHERE source_name = 'hospital_demand') AS \"Hospital demand\",\n       sum(rows_generated) FILTER (WHERE source_name = 'master') AS \"Master (price changes)\"\nFROM ops.generation_log\nGROUP BY refresh_no\nORDER BY refresh_no"
         }
       ],
       "fieldConfig": {
@@ -831,6 +840,19 @@
       }
     },
     {
+      "id": 17,
+      "type": "row",
+      "title": "Load log",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
       "id": 16,
       "type": "table",
       "title": "Load log (latest first)",
@@ -840,9 +862,9 @@
         "uid": "pharma-pg"
       },
       "gridPos": {
-        "x": 9,
-        "y": 27,
-        "w": 15,
+        "x": 0,
+        "y": 36,
+        "w": 24,
         "h": 9
       },
       "targets": [
@@ -877,7 +899,7 @@
               {
                 "id": "custom.cellOptions",
                 "value": {
-                  "type": "color-background"
+                  "type": "color-text"
                 }
               },
               {
@@ -897,6 +919,18 @@
                     }
                   }
                 ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Seconds"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 2
               }
             ]
           }

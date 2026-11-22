@@ -80,7 +80,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "text",
                 "value": null
               }
             ]
@@ -96,7 +96,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -142,7 +142,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "purple",
+                "color": "text",
                 "value": null
               }
             ]
@@ -159,7 +159,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -205,7 +205,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "text",
                 "value": null
               }
             ]
@@ -221,7 +221,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -283,7 +283,7 @@
           "fields": "/.*/",
           "values": false
         },
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "textMode": "value",
         "justifyMode": "center",
@@ -316,7 +316,7 @@
       "gridPos": {
         "x": 0,
         "y": 6,
-        "w": 7,
+        "w": 6,
         "h": 9
       },
       "targets": [
@@ -356,9 +356,8 @@
         "legend": {
           "showLegend": true,
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
           "values": [
-            "value",
             "percent"
           ]
         },
@@ -370,15 +369,15 @@
     },
     {
       "id": 8,
-      "type": "piechart",
-      "title": "Share of storage (MB) by source",
+      "type": "barchart",
+      "title": "Storage (MB) by table",
       "description": "pg_total_relation_size (table + indexes) per staging table",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "pharma-pg"
       },
       "gridPos": {
-        "x": 7,
+        "x": 6,
         "y": 6,
         "w": 7,
         "h": 9
@@ -393,7 +392,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT replace(table_name, 'staging.stg_', '') AS \"Table\", size_mb AS \"MB\"\nFROM ops.storage_metrics WHERE captured_at = (SELECT max(captured_at) FROM ops.storage_metrics) AND table_name <> 'DATABASE TOTAL'\nORDER BY 2 DESC"
+          "rawSql": "SELECT replace(table_name, 'staging.stg_', '') AS \"Table\", round(size_mb, 1) AS \"MB\"\nFROM ops.storage_metrics WHERE captured_at = (SELECT max(captured_at) FROM ops.storage_metrics) AND table_name <> 'DATABASE TOTAL'\nORDER BY 2 DESC"
         }
       ],
       "fieldConfig": {
@@ -401,33 +400,30 @@
           "unit": "decmbytes",
           "color": {
             "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 85,
+            "lineWidth": 0
           }
         },
         "overrides": []
       },
       "options": {
-        "pieType": "donut",
-        "displayLabels": [
-          "percent"
-        ],
-        "reduceOptions": {
-          "values": true,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
+        "orientation": "horizontal",
+        "xField": "Table",
+        "stacking": "none",
+        "showValue": "auto",
+        "barWidth": 0.8,
+        "groupWidth": 0.75,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0,
         "legend": {
           "showLegend": true,
-          "displayMode": "table",
-          "placement": "right",
-          "values": [
-            "value",
-            "percent"
-          ]
+          "displayMode": "list",
+          "placement": "bottom"
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       }
@@ -442,9 +438,9 @@
         "uid": "pharma-pg"
       },
       "gridPos": {
-        "x": 14,
+        "x": 13,
         "y": 6,
-        "w": 10,
+        "w": 11,
         "h": 9
       },
       "targets": [
@@ -457,7 +453,7 @@
           "rawQuery": true,
           "editorMode": "code",
           "format": "table",
-          "rawSql": "SELECT replace(table_name, 'staging.stg_', '') AS \"Table\", row_count AS \"Rows\",\n       to_char(first_date, 'YYYY-MM-DD') AS \"First date\", to_char(last_date, 'YYYY-MM-DD') AS \"Last date\", coverage_days AS \"Days covered\",\n       round(coverage_days / 365.25, 1) AS \"Years\"\nFROM ops.storage_metrics WHERE captured_at = (SELECT max(captured_at) FROM ops.storage_metrics) AND row_count IS NOT NULL\nORDER BY row_count DESC"
+          "rawSql": "SELECT replace(table_name, 'staging.stg_', '') AS \"Table\", row_count AS \"Rows\",\n       to_char(first_date, 'YYYY-MM-DD') AS \"First date\", to_char(last_date, 'YYYY-MM-DD') AS \"Last date\"\nFROM ops.storage_metrics WHERE captured_at = (SELECT max(captured_at) FROM ops.storage_metrics) AND row_count IS NOT NULL\nORDER BY row_count DESC"
         }
       ],
       "fieldConfig": {
@@ -469,7 +465,20 @@
             }
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rows"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
